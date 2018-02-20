@@ -20,11 +20,13 @@ namespace SteppingStoneCapture
         private int deviceIndex = 0;
         private IList<LivePacketDevice> allDevices;
         private string defaultFilterField = "";
+        private string filter = "";
         private List<byte[]> packetBytes = new List<byte[]>();
         private Int32 packetNumber = 0;
         private bool captFlag = true;
         private int numThreads = 0;
         private Boolean boxChecked = false;
+        private CougarFilterBuilder cfb = new CougarFilterBuilder();
 
 
         public CaptureForm()
@@ -82,85 +84,51 @@ namespace SteppingStoneCapture
 
             foreach (Control c in this.Controls)
             {
-                if (c is CheckBox)
+                if (c is CheckBox chk)
                 {
-                    CheckBox chk = (CheckBox)c;
                     if (chk.Checked)
                     {
                         boxChecked = true;
-                        if (txtFilterField.Text.Length < 2)
-                        {
-                            if (chk.Text != "DNS")
-                            {
-                                txtFilterField.Text += chk.Text.ToLower();
-                            }  
-                            else
-                            {
-                                txtFilterField.Text += "udp port 53 or tcp port 53";
-                            }
-                        }
-                        else
-                        {
-                            if (chk.Text != "DNS")
-                            {
-                                txtFilterField.Text += " or " + chk.Text.ToLower();
-                            }
-                            else
-                            {
-                                txtFilterField.Text += " or udp port 53 or tcp port 53";
-                            }
-                        }
+
+                        cfb.AddToProtocolList(chk.Text);
+                        
                     }
                 }
-                if (c.Name == "txtSrcIP")
+                if (c is TextBox tb)
                 {
-                    TextBox srcIP = (TextBox)c;
-                    if (srcIP.Text != "")
+                    if (tb.Name == "txtSrcIP")
                     {
-                        if (boxChecked && txtFilterField.Text.Length > 2) txtFilterField.Text += " and src host " + srcIP.Text;
-                        else txtFilterField.Text += "src host " + srcIP.Text;
-                    }                   
-                }
-                if (c.Name == "txtDestIP")
-                {
-                    TextBox dstIP = (TextBox)c;
-                    if (dstIP.Text != "")
-                    {                        
-                        if (boxChecked && txtFilterField.Text.Length > 2) txtFilterField.Text += " and dst host " + dstIP.Text;
-                        else txtFilterField.Text += "dst host " + dstIP.Text;
-                    }                   
-                }
-                if (c.Name == "txtSrcPort")
-                {
-                    TextBox srcPort = (TextBox)c;
-                    if (srcPort.Text != "")
-                    {                        
-                        if (boxChecked && txtFilterField.Text.Length > 2) txtFilterField.Text += " and src port " + srcPort.Text;
-                        else txtFilterField.Text += "src port " + srcPort.Text;
-                    }                    
-                }
-                if (c.Name == "txtDestPort")
-                {
-                    TextBox dstPort = (TextBox)c;
-                    if (dstPort.Text != "")
-                    {                        
-                        if (boxChecked && txtFilterField.Text.Length > 2) txtFilterField.Text += " and dst port " + dstPort.Text;
-                        else txtFilterField.Text += "dst port " + dstPort.Text;
-                    }                    
+                        if (tb.Text != "")
+                         cfb.AddToAttributeList("src host "+ tb.Text.ToLower());
+                    }
+                    if (tb.Name == "txtDestIP")
+                    {
+                        if (tb.Text != "")
+                            cfb.AddToAttributeList("dst host " + tb.Text.ToLower());
+                    }
+                    if (tb.Name == "txtSrcPort")
+                    {
+                        if (tb.Text != "")
+                            cfb.AddToAttributeList("src port " + tb.Text);
+                    }
+                    if (tb.Name == "txtDestPort")
+                    {
+                        if (tb.Text != "")
+                            cfb.AddToAttributeList("dst port "+tb.Text);
+                    }
                 }
             }
 
-            //filter field acts wonky when entering tcp and source ip:
-            // src host 212 or tcp should be tcp src host 212
-            if (txtFilterField.Text.Length < 2) txtFilterField.Text = "ip";
-            
-
+            filter = cfb.BuildFilterString();
+            txtFilterField.Text = filter;
             //capture packets     
             if ((numThreads < 1) && (deviceIndex != 0))
             {
-                ++numThreads;               
-                Thread t = new Thread(new ThreadStart(CapturePackets));
-                t.IsBackground = true;
+                ++numThreads;
+                Thread t = new Thread(new ThreadStart(CapturePackets))
+                {
+                    IsBackground = true
+                };
                 t.Start();                
             }
         }
@@ -176,8 +144,11 @@ namespace SteppingStoneCapture
                                     PacketDeviceOpenAttributes.Promiscuous, // promiscuous mode
                                     1000))                                  // read timeout
             {
-                //communicator.SetFilter(captureFieldBuilder.ToString());
-                communicator.SetFilter(txtFilterField.Text);
+                this.Invoke((MethodInvoker)(() => {
+                    ListViewItem lvi = new ListViewItem(filter);
+                }));
+                
+                communicator.SetFilter(filter);
                 Packet packet;
                 int prevInd = 0;
                 while (captFlag)
@@ -192,13 +163,16 @@ namespace SteppingStoneCapture
                             break;
                         case PacketCommunicatorReceiveResult.Ok:
                             IpV4Datagram ipv4 = packet.Ethernet.IpV4;
+                            IpV4Protocol i = ipv4.Protocol;
                             CougarPacket cp = new CougarPacket(packet.Timestamp.ToString("hh:mm:ss.fff"),
                                                                ++packetNumber,
                                                                packet.Length,
                                                                ipv4.Source.ToString(),
                                                                ipv4.Destination.ToString());
+
                             packetInfo = Encoding.ASCII.GetBytes(cp.ToString() + "\n");
                             packetBytes.Add(packetInfo);
+
                             this.Invoke((MethodInvoker)(() => 
                             {
                                 packetView.Items.Add(new ListViewItem(cp.toPropertyArray()));
@@ -246,10 +220,7 @@ namespace SteppingStoneCapture
                 }
             }
 
-            txtFilterField.Text = defaultFilterField;
-            packetNumber = 0;
-            captFlag = true;
-            packetView.Items.Clear();
+            ResetNecessaryProperties();
         }
 
         private void cmbInterfaces_SelectedIndexChanged(object sender, EventArgs e)
@@ -269,6 +240,18 @@ namespace SteppingStoneCapture
             {
                 File.AppendAllText(fileName, Encoding.ASCII.GetString(barr));
             }
+
+            packetBytes.Clear();
+        }
+
+        private void ResetNecessaryProperties()
+        {
+            txtFilterField.Text = defaultFilterField;
+            packetNumber = 0;
+            captFlag = true;
+            packetView.Items.Clear();
+            cfb.ClearFilterLists();
+            packetBytes.Clear();
         }
     }
 }
