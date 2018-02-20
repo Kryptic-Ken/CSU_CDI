@@ -85,7 +85,7 @@ namespace SteppingStoneCapture
                 if (c is CheckBox)
                 {
                     CheckBox chk = (CheckBox)c;
-                    if (chk.Checked == true)
+                    if (chk.Checked)
                     {
                         boxChecked = true;
                         if (txtFilterField.Text.Length < 2)
@@ -149,6 +149,9 @@ namespace SteppingStoneCapture
                     }                    
                 }
             }
+
+            //filter field acts wonky when entering tcp and source ip:
+            // src host 212 or tcp should be tcp src host 212
             if (txtFilterField.Text.Length < 2) txtFilterField.Text = "ip";
             
 
@@ -176,7 +179,7 @@ namespace SteppingStoneCapture
                 //communicator.SetFilter(captureFieldBuilder.ToString());
                 communicator.SetFilter(txtFilterField.Text);
                 Packet packet;
-
+                int prevInd = 0;
                 while (captFlag)
                 {
                     PacketCommunicatorReceiveResult result = communicator.ReceivePacket(out packet);
@@ -199,7 +202,12 @@ namespace SteppingStoneCapture
                             this.Invoke((MethodInvoker)(() => 
                             {
                                 packetView.Items.Add(new ListViewItem(cp.toPropertyArray()));
-                                packetView.Items[packetView.Items.Count - 1].EnsureVisible();
+                                ++prevInd;
+                                if (chkAutoScroll.Checked && prevInd > 4)
+                                {
+                                    packetView.Items[packetView.Items.Count - 1].EnsureVisible();
+                                    prevInd = 0;
+                                }
                             }));
                             break;
                         default:
