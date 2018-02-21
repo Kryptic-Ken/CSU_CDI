@@ -108,7 +108,7 @@
             this.cmbInterfaces.Name = "cmbInterfaces";
             this.cmbInterfaces.Size = new System.Drawing.Size(230, 21);
             this.cmbInterfaces.TabIndex = 2;
-            this.cmbInterfaces.SelectedIndexChanged += new System.EventHandler(this.cmbInterfaces_SelectedIndexChanged);
+            this.cmbInterfaces.SelectedIndexChanged += new System.EventHandler(this.CmbInterfaces_SelectedIndexChanged);
             // 
             // chkTCP
             // 
@@ -170,7 +170,7 @@
             this.txtFilterField.Location = new System.Drawing.Point(9, 118);
             this.txtFilterField.Margin = new System.Windows.Forms.Padding(2);
             this.txtFilterField.Name = "txtFilterField";
-            this.txtFilterField.Size = new System.Drawing.Size(230, 20);
+            this.txtFilterField.Size = new System.Drawing.Size(438, 20);
             this.txtFilterField.TabIndex = 8;
             this.txtFilterField.Visible = false;
             // 
@@ -220,7 +220,7 @@
             this.txtSrcIP.Location = new System.Drawing.Point(332, 27);
             this.txtSrcIP.Margin = new System.Windows.Forms.Padding(2);
             this.txtSrcIP.Name = "txtSrcIP";
-            this.txtSrcIP.Size = new System.Drawing.Size(76, 20);
+            this.txtSrcIP.Size = new System.Drawing.Size(115, 20);
             this.txtSrcIP.TabIndex = 13;
             // 
             // txtDestIP
@@ -228,7 +228,7 @@
             this.txtDestIP.Location = new System.Drawing.Point(332, 48);
             this.txtDestIP.Margin = new System.Windows.Forms.Padding(2);
             this.txtDestIP.Name = "txtDestIP";
-            this.txtDestIP.Size = new System.Drawing.Size(76, 20);
+            this.txtDestIP.Size = new System.Drawing.Size(115, 20);
             this.txtDestIP.TabIndex = 14;
             // 
             // txtSrcPort
@@ -236,7 +236,7 @@
             this.txtSrcPort.Location = new System.Drawing.Point(332, 70);
             this.txtSrcPort.Margin = new System.Windows.Forms.Padding(2);
             this.txtSrcPort.Name = "txtSrcPort";
-            this.txtSrcPort.Size = new System.Drawing.Size(76, 20);
+            this.txtSrcPort.Size = new System.Drawing.Size(116, 20);
             this.txtSrcPort.TabIndex = 15;
             // 
             // txtDestPort
@@ -244,7 +244,7 @@
             this.txtDestPort.Location = new System.Drawing.Point(332, 91);
             this.txtDestPort.Margin = new System.Windows.Forms.Padding(2);
             this.txtDestPort.Name = "txtDestPort";
-            this.txtDestPort.Size = new System.Drawing.Size(76, 20);
+            this.txtDestPort.Size = new System.Drawing.Size(116, 20);
             this.txtDestPort.TabIndex = 16;
             // 
             // btnStart
@@ -267,7 +267,7 @@
             this.btnReset.TabIndex = 18;
             this.btnReset.Text = "&Reset";
             this.btnReset.UseVisualStyleBackColor = true;
-            this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
+            this.btnReset.Click += new System.EventHandler(this.BtnReset_Click);
             // 
             // btnStop
             // 
@@ -278,7 +278,7 @@
             this.btnStop.TabIndex = 19;
             this.btnStop.Text = "S&top";
             this.btnStop.UseVisualStyleBackColor = true;
-            this.btnStop.Click += new System.EventHandler(this.btnStop_Click);
+            this.btnStop.Click += new System.EventHandler(this.BtnStop_Click);
             // 
             // btnExit
             // 
@@ -300,12 +300,12 @@
             this.btnSave.TabIndex = 22;
             this.btnSave.Text = "Sav&e";
             this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnSave.Click += new System.EventHandler(this.BtnSave_Click);
             // 
             // lblFilterField
             // 
             this.lblFilterField.AutoSize = true;
-            this.lblFilterField.Location = new System.Drawing.Point(97, 102);
+            this.lblFilterField.Location = new System.Drawing.Point(9, 103);
             this.lblFilterField.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lblFilterField.Name = "lblFilterField";
             this.lblFilterField.Size = new System.Drawing.Size(57, 13);
