@@ -17,6 +17,7 @@ namespace SteppingStoneCapture
 {
     public partial class CaptureForm : Form
     {
+        //Kendrick
         private int deviceIndex = 0;
         private IList<LivePacketDevice> allDevices;
         private string defaultFilterField = "";
